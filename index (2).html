@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compliance Tracker App</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .main-container {
+            height: 90vh;
+        }
+        .list-item-active {
+            background-color: #fff;
+            border-left: 4px solid #3b82f6;
+        }
+        /* Custom styles for the form inputs */
+        input, select {
+            border: 1px solid #d1d5db;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            background-color: #f9fafb;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #60a5fa;
+            ring-2: 2px;
+            ring-blue-200: 2px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <!-- Container for all screens -->
+    <div class="w-full max-w-6xl">
+        
+        <!-- ============================================== -->
+        <!-- Main Compliance Tracker Screen -->
+        <!-- ============================================== -->
+        <div id="main-screen-container" class="main-container bg-white shadow-xl rounded-lg overflow-hidden flex w-full relative">
+            <div class="absolute top-0 left-0 right-0 h-16 bg-blue-600 text-white flex items-center px-6 shadow-md z-10">
+                <h1 class="text-xl font-bold">Main Compliance Tracker List</h1>
+            </div>
+
+            <!-- Left Pane - Compliance List -->
+            <div class="w-1/3 border-r border-gray-200 bg-gray-50 pt-20 flex flex-col">
+                <div class="p-4 flex flex-col gap-2">
+                    <div class="flex items-center bg-white border border-gray-300 rounded-md shadow-sm">
+                        <input type="text" id="searchInput" placeholder="Search" class="flex-grow p-2 text-sm rounded-l-md focus:outline-none" />
+                        <button class="p-2 text-gray-400">
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                    <!-- "New" button to navigate to the New Entry Screen -->
+                    <button id="newButton" onclick="showScreen('new-entry-container')" class="flex items-center px-4 py-2 bg-white text-gray-700 rounded-md border border-gray-300 shadow-sm hover:bg-gray-100 transition-colors">
+                        <svg class="h-4 w-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                        </svg>
+                        New
+                    </button>
+                </div>
+
+                <div id="complianceList" class="flex-grow overflow-y-auto">
+                    <!-- List items will be rendered here by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Right Pane - Details View -->
+            <div class="w-2/3 p-6 pt-20 flex flex-col gap-6">
+                <div class="flex justify-between items-center pb-4 border-b border-gray-200">
+                    <h2 id="detailsTitle" class="text-xl font-semibold text-gray-800"></h2>
+                    <div class="flex gap-2">
+                        <!-- "Edit" button to navigate to the Update Screen -->
+                        <button id="editButton" class="p-2 text-gray-500 hover:text-gray-900 transition-colors">
+                            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.794.793-2.828-2.828.793-.793zm-5.121 7.284A2 2 0 0011.07 13.586L7.382 17.272 3 17 3.033 12.06l4.636-4.637z" />
+                            </svg>
+                        </button>
+                        <button class="p-2 text-gray-500 hover:text-gray-900 transition-colors">
+                            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 000-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex-grow">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="col-span-2 md:col-span-1">
+                            <label class="block text-sm font-medium text-gray-500">Title</label>
+                            <div id="detail-Title" class="mt-1 block w-full bg-gray-100 border border-gray-200 rounded-md shadow-sm p-2 text-sm text-gray-800"></div>
+                        </div>
+                        <div class="col-span-2 md:col-span-1">
+                            <label class="block text-sm font-medium text-gray-500">Frequency</label>
+                            <div id="detail-Frequency" class="mt-1 block w-full bg-gray-100 border border-gray-200 rounded-md shadow-sm p-2 text-sm text-gray-800"></div>
+                        </div>
+                        <div class="col-span-2 md:col-span-1">
+                            <label class="block text-sm font-medium text-gray-500">Count</label>
+                            <div id="detail-Count" class="mt-1 block w-full bg-gray-100 border border-gray-200 rounded-md shadow-sm p-2 text-sm text-gray-800"></div>
+                        </div>
+                        <div class="col-span-2 md:col-span-1">
+                            <label class="block text-sm font-medium text-gray-500">LastUpdateDate</label>
+                            <div id="detail-LastUpdateDate" class="mt-1 block w-full bg-gray-100 border border-gray-200 rounded-md shadow-sm p-2 text-sm text-gray-800"></div>
+                        </div>
+                        <div class="col-span-2 md:col-span-1">
+                            <label class="block text-sm font-medium text-gray-500">NextDueDate</label>
+                            <div id="detail-NextDueDate" class="mt-1 block w-full bg-gray-100 border border-gray-200 rounded-md shadow-sm p-2 text-sm text-gray-800"></div>
+                        </div>
+                        <div class="col-span-2 md:col-span-1">
+                            <label class="block text-sm font-medium text-gray-500">O-ID</label>
+                            <div id="detail-OID" class="mt-1 block w-full bg-gray-100 border border-gray-200 rounded-md shadow-sm p-2 text-sm text-gray-800"></div>
+                        </div>
+                        <div class="col-span-2 md:col-span-1">
+                            <label class="block text-sm font-medium text-gray-500">O-ID1</label>
+                            <div id="detail-OID1" class="mt-1 block w-full bg-gray-100 border border-gray-200 rounded-md shadow-sm p-2 text-sm text-gray-800"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-4">
+                    <!-- This button is now a placeholder and navigation is handled by the edit icon -->
+                    <button class="px-6 py-3 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition-colors font-semibold">
+                        New Entry
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- New Entry Screen (Initially hidden) -->
+        <!-- ============================================== -->
+        <div id="new-entry-container" class="hidden main-container bg-white shadow-xl rounded-lg overflow-hidden w-full relative">
+            <div class="absolute top-0 left-0 right-0 h-16 bg-blue-600 text-white flex items-center px-6 shadow-md z-10 rounded-t-lg">
+                <h1 class="text-xl font-bold">New Entry Screen</h1>
+            </div>
+
+            <!-- Form Section -->
+            <div class="pt-20 pb-4 p-6 w-full flex flex-col justify-between">
+                <div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Title Field -->
+                        <div>
+                            <label for="new-title" class="block text-sm font-medium text-gray-700">Title</label>
+                            <input type="text" id="new-title" name="title" class="mt-1 block w-full rounded-md shadow-sm">
+                        </div>
+                        <!-- LastUpdateDate Field -->
+                        <div class="relative">
+                            <label for="new-lastUpdateDate" class="block text-sm font-medium text-gray-700">LastUpdateDate</label>
+                            <div class="mt-1 flex rounded-md shadow-sm">
+                                <input type="text" id="new-lastUpdateDate" name="lastUpdateDate" value="12/31/2001" class="flex-1 block w-full rounded-l-md">
+                                <button class="p-2 bg-gray-200 rounded-r-md border border-gray-300 hover:bg-gray-300 transition-colors">
+                                    <svg class="h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- NextDueDate Field -->
+                        <div class="relative">
+                            <label for="new-nextDueDate" class="block text-sm font-medium text-gray-700">NextDueDate</label>
+                            <div class="mt-1 flex rounded-md shadow-sm">
+                                <input type="text" id="new-nextDueDate" name="nextDueDate" value="12/31/2001" class="flex-1 block w-full rounded-l-md">
+                                <button class="p-2 bg-gray-200 rounded-r-md border border-gray-300 hover:bg-gray-300 transition-colors">
+                                    <svg class="h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Frequency Field -->
+                        <div>
+                            <label for="new-frequency" class="block text-sm font-medium text-gray-700">Frequency</label>
+                            <select id="new-frequency" name="frequency" class="mt-1 block w-full rounded-md shadow-sm">
+                                <option>Find items</option>
+                                <option>Monthly</option>
+                                <option>Quarterly</option>
+                                <option>Yearly</option>
+                            </select>
+                        </div>
+                        <!-- Count Field -->
+                        <div>
+                            <label for="new-count" class="block text-sm font-medium text-gray-700">Count</label>
+                            <input type="text" id="new-count" name="count" class="mt-1 block w-full rounded-md shadow-sm">
+                        </div>
+                        <!-- O-ID Field -->
+                        <div>
+                            <label for="new-oid" class="block text-sm font-medium text-gray-700">O-ID</label>
+                            <input type="text" id="new-oid" name="oid" class="mt-1 block w-full rounded-md shadow-sm">
+                        </div>
+                        <!-- ComplianceID Field -->
+                        <div>
+                            <label for="new-complianceID" class="block text-sm font-medium text-gray-700">ComplianceID</label>
+                            <select id="new-complianceID" name="complianceID" class="mt-1 block w-full rounded-md shadow-sm">
+                                <option>Find items</option>
+                            </select>
+                        </div>
+                        <!-- Content type Field -->
+                        <div>
+                            <label for="new-contentType" class="block text-sm font-medium text-gray-700">Content type</label>
+                            <select id="new-contentType" name="contentType" class="mt-1 block w-full rounded-md shadow-sm">
+                                <option>Find items</option>
+                            </select>
+                        </div>
+                        <!-- Created Field -->
+                        <div>
+                            <label for="new-created" class="block text-sm font-medium text-gray-700">Created</label>
+                            <input type="text" id="new-created" name="created" class="mt-1 block w-full rounded-md shadow-sm" readonly>
+                        </div>
+                    </div>
+                </div>
+            
+                <!-- Buttons Section -->
+                <div class="flex justify-between items-center pt-4 border-t border-gray-200 mt-6">
+                    <button class="px-6 py-3 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition-colors font-semibold">
+                        Button
+                    </button>
+                    <!-- "Go to Update Screen" button for navigation -->
+                    <button onclick="showScreen('update-screen-container')" class="px-6 py-3 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition-colors font-semibold">
+                        Go to Update Screen
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ============================================== -->
+        <!-- Update Screen (Initially hidden) -->
+        <!-- ============================================== -->
+        <div id="update-screen-container" class="hidden main-container bg-white shadow-xl rounded-lg overflow-hidden w-full relative">
+            <div class="absolute top-0 left-0 right-0 h-16 bg-blue-600 text-white flex items-center px-6 shadow-md z-10 rounded-t-lg">
+                <h1 class="text-xl font-bold">UpdateScreen</h1>
+            </div>
+
+            <!-- Form Section -->
+            <div class="pt-20 pb-4 p-6 w-full flex flex-col justify-between">
+                <div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Title Field (pre-populated) -->
+                        <div>
+                            <label for="update-title" class="block text-sm font-medium text-gray-700">Title</label>
+                            <input type="text" id="update-title" name="title" value="Fire Safety Inspection" class="mt-1 block w-full rounded-md shadow-sm">
+                        </div>
+                        <!-- LastUpdateDate Field (pre-populated) -->
+                        <div class="relative">
+                            <label for="update-lastUpdateDate" class="block text-sm font-medium text-gray-700">LastUpdateDate</label>
+                            <div class="mt-1 flex rounded-md shadow-sm">
+                                <input type="text" id="update-lastUpdateDate" name="lastUpdateDate" value="6/2/2025" class="flex-1 block w-full rounded-l-md">
+                                <button class="p-2 bg-gray-200 rounded-r-md border border-gray-300 hover:bg-gray-300 transition-colors">
+                                    <svg class="h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- NextDueDate Field (pre-populated) -->
+                        <div class="relative">
+                            <label for="update-nextDueDate" class="block text-sm font-medium text-gray-700">NextDueDate</label>
+                            <div class="mt-1 flex rounded-md shadow-sm">
+                                <input type="text" id="update-nextDueDate" name="nextDueDate" value="7/5/2025" class="flex-1 block w-full rounded-l-md">
+                                <button class="p-2 bg-gray-200 rounded-r-md border border-gray-300 hover:bg-gray-300 transition-colors">
+                                    <svg class="h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Frequency Field (pre-populated) -->
+                        <div>
+                            <label for="update-frequency" class="block text-sm font-medium text-gray-700">Frequency</label>
+                            <select id="update-frequency" name="frequency" class="mt-1 block w-full rounded-md shadow-sm">
+                                <option>Monthly</option>
+                                <option>Quarterly</option>
+                                <option>Yearly</option>
+                            </select>
+                        </div>
+                        <!-- Count Field (pre-populated) -->
+                        <div>
+                            <label for="update-count" class="block text-sm font-medium text-gray-700">Count</label>
+                            <input type="text" id="update-count" name="count" value="1" class="mt-1 block w-full rounded-md shadow-sm">
+                        </div>
+                        <!-- O-ID Field -->
+                        <div>
+                            <label for="update-oid" class="block text-sm font-medium text-gray-700">O-ID</label>
+                            <input type="text" id="update-oid" name="oid" value="O-ID1" class="mt-1 block w-full rounded-md shadow-sm">
+                        </div>
+                        <!-- ComplianceID Field (pre-populated) -->
+                        <div>
+                            <label for="update-complianceID" class="block text-sm font-medium text-gray-700">ComplianceID</label>
+                            <select id="update-complianceID" name="complianceID" class="mt-1 block w-full rounded-md shadow-sm">
+                                <option>O-ID1</option>
+                                <option>O-ID2</option>
+                                <option>O-ID3</option>
+                            </select>
+                        </div>
+                        <!-- Content type Field (pre-populated) -->
+                        <div>
+                            <label for="update-contentType" class="block text-sm font-medium text-gray-700">Content type</label>
+                            <select id="update-contentType" name="contentType" class="mt-1 block w-full rounded-md shadow-sm">
+                                <option>0x01006EA107874679A94CA071541</option>
+                                <option>Option 2</option>
+                                <option>Option 3</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            
+                <!-- Buttons Section -->
+                <div class="flex flex-col items-end gap-3 pt-4 border-t border-gray-200 mt-6">
+                    <button class="w-full md:w-auto px-6 py-3 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition-colors font-semibold">
+                        Update
+                    </button>
+                    <!-- "Main Screen" button for navigation -->
+                    <button onclick="showScreen('main-screen-container')" class="w-full md:w-auto px-6 py-3 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition-colors font-semibold">
+                        Main Screen
+                    </button>
+                    <!-- "New Entry Screen" button for navigation -->
+                    <button onclick="showScreen('new-entry-container')" class="w-full md:w-auto px-6 py-3 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition-colors font-semibold">
+                        New Entry Screen
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Mock data to represent the compliance items
+        const complianceData = [
+            { id: 1, title: 'Fire Safety Inspection', frequency: 'Monthly', count: 1, lastUpdate: '6/2/2025', nextDueDate: '7/5/2025', oid: 'O-ID', oid1: 'O-ID1' },
+            { id: 2, title: 'Financial Audit', frequency: 'Quarterly', count: 1, lastUpdate: '3/1/2025', nextDueDate: '6/1/2025', oid: 'O-ID2', oid1: 'O-ID3' },
+            { id: 3, title: 'HVAC System Maintenance', frequency: 'Monthly', count: 2, lastUpdate: '6/15/2025', nextDueDate: '7/15/2025', oid: 'O-ID4', oid1: 'O-ID5' },
+            { id: 4, title: 'Data Privacy Policy Review', frequency: 'Yearly', count: 1, lastUpdate: '1/1/2025', nextDueDate: '1/1/2026', oid: 'O-ID6', oid1: 'O-ID7' },
+            { id: 5, title: 'Employee Training on Security', frequency: 'Quarterly', count: 2, lastUpdate: '5/1/2025', nextDueDate: '8/1/2025', oid: 'O-ID8', oid1: 'O-ID9' },
+        ];
+
+        // ==============================================
+        // JavaScript for Navigation and UI Logic
+        // ==============================================
+        
+        // Function to show a specific screen and hide the others
+        function showScreen(screenId) {
+            const screens = document.querySelectorAll('#main-screen-container, #new-entry-container, #update-screen-container');
+            screens.forEach(screen => {
+                if (screen.id === screenId) {
+                    screen.classList.remove('hidden');
+                } else {
+                    screen.classList.add('hidden');
+                }
+            });
+        }
+        
+        // ==============================================
+        // JavaScript specific to the Main Screen
+        // ==============================================
+        const complianceListEl = document.getElementById('complianceList');
+        const searchInputEl = document.getElementById('searchInput');
+        const detailsTitleEl = document.getElementById('detailsTitle');
+        const editButtonEl = document.getElementById('editButton');
+        const detailElements = {
+            Title: document.getElementById('detail-Title'),
+            Frequency: document.getElementById('detail-Frequency'),
+            Count: document.getElementById('detail-Count'),
+            LastUpdateDate: document.getElementById('detail-LastUpdateDate'),
+            NextDueDate: document.getElementById('detail-NextDueDate'),
+            OID: document.getElementById('detail-OID'),
+            OID1: document.getElementById('detail-OID1'),
+        };
+        let selectedItemId = 1;
+
+        function renderComplianceList(items, activeId) {
+            complianceListEl.innerHTML = '';
+            items.forEach(item => {
+                const isActive = item.id === activeId;
+                const listItem = document.createElement('div');
+                listItem.dataset.id = item.id;
+                listItem.className = `cursor-pointer flex justify-between items-center p-4 pr-6 border-b border-gray-200 transition-colors duration-200 ease-in-out hover:bg-gray-100 ${isActive ? 'list-item-active' : ''}`;
+                listItem.innerHTML = `
+                    <div class="flex-grow">
+                        <div class="font-medium text-gray-800">${item.title}</div>
+                        <div class="text-sm text-gray-500">${item.frequency}</div>
+                    </div>
+                    <div class="flex items-center text-gray-400">
+                        <span class="mr-2 text-sm">${item.count}</span>
+                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                `;
+                complianceListEl.appendChild(listItem);
+            });
+        }
+
+        function renderDetails(item) {
+            if (!item) {
+                detailsTitleEl.textContent = '';
+                Object.values(detailElements).forEach(el => el.textContent = '');
+                return;
+            }
+            detailsTitleEl.textContent = item.title;
+            detailElements.Title.textContent = item.title;
+            detailElements.Frequency.textContent = item.frequency;
+            detailElements.Count.textContent = item.count;
+            detailElements.LastUpdateDate.textContent = item.lastUpdate;
+            detailElements.NextDueDate.textContent = item.nextDueDate;
+            detailElements.OID.textContent = item.oid;
+            detailElements.OID1.textContent = item.oid1;
+
+            renderComplianceList(complianceData, item.id);
+        }
+
+        complianceListEl.addEventListener('click', (e) => {
+            const listItem = e.target.closest('div[data-id]');
+            if (listItem) {
+                const id = parseInt(listItem.dataset.id);
+                selectedItemId = id;
+                const selectedItem = complianceData.find(item => item.id === id);
+                renderDetails(selectedItem);
+            }
+        });
+
+        searchInputEl.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredItems = complianceData.filter(item =>
+                item.title.toLowerCase().includes(searchTerm) ||
+                item.frequency.toLowerCase().includes(searchTerm)
+            );
+            renderComplianceList(filteredItems, selectedItemId);
+        });
+
+        // Event listener for the main screen's "edit" button to show the update screen
+        editButtonEl.addEventListener('click', () => {
+            showScreen('update-screen-container');
+            // Logic to populate the update screen with selected item data would go here
+        });
+
+        // Event listener for the "New" button in the main screen to show the new entry screen
+        document.getElementById('newButton').addEventListener('click', () => {
+            showScreen('new-entry-container');
+        });
+
+        // Initial rendering on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            renderDetails(complianceData.find(item => item.id === selectedItemId));
+        });
+    </script>
+</body>
+</html>
